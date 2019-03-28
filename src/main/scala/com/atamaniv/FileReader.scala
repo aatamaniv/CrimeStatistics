@@ -1,7 +1,7 @@
 package com.atamaniv
 
-import akka.actor.{Actor, Props}
-import com.atamaniv.Messages.GetCsvFiles
+import akka.actor.{Actor, ActorLogging, Props}
+import com.atamaniv.Messages.{Crime, ReadCsvFile}
 
 import scala.reflect.io.Path
 
@@ -9,13 +9,16 @@ object FileReader {
   def props(): Props = Props(new FileReader)
 }
 
-class FileReader extends Actor {
+class FileReader extends Actor with ActorLogging {
+
+  override def preStart(): Unit = log.info(s"FileReader $self has been started")
+  override def postStop(): Unit = log.info(s"FileReader $self has been stopped")
 
   override def receive: Receive = {
-    case GetCsvFiles(folderPath: Path) => sender ! getFiles(folderPath)
+    case ReadCsvFile(filePath: Path) => sender ! readFile(filePath)
   }
 
-  private def getFiles(path: Path): List[Path] = {
+  private def readFile(path: Path): List[Crime] = {
     //TODO: under implementation
     Nil
   }

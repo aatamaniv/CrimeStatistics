@@ -1,6 +1,7 @@
 package com.atamaniv
 
 import akka.actor.ActorSystem
+import com.atamaniv.Messages.{CreateFolderReaderActor, PrintMessage}
 
 object Main extends Greeting with App {
   println(startMessage)
@@ -9,7 +10,9 @@ object Main extends Greeting with App {
     val system = ActorSystem("crime-system")
 
     try {
-      val supervisor = system.actorOf(IotSupervisor.props(), "crime-supervisor")
+      val supervisor = system.actorOf(CrimeSupervisor.props(), "crime-supervisor")
+      supervisor ! PrintMessage("Test Message")
+      supervisor ! CreateFolderReaderActor("resources.crimes")
     } finally {
       println("exit")
     }
