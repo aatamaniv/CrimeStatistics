@@ -1,7 +1,7 @@
 package com.atamaniv
 
 import akka.actor.ActorSystem
-import com.atamaniv.Messages.{CreateFolderReaderActor, PrintMessage}
+import com.atamaniv.Messages.{GetCsvFiles, PrintMessage}
 
 object Main extends Greeting with App {
   println(startMessage)
@@ -12,7 +12,7 @@ object Main extends Greeting with App {
     try {
       val supervisor = system.actorOf(CrimeSupervisor.props(), "crime-supervisor")
       supervisor ! PrintMessage("Test Message")
-      supervisor ! CreateFolderReaderActor("resources.crimes")
+      supervisor ! GetCsvFiles("resources.crimes")
     } finally {
       println("exit")
     }
