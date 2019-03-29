@@ -1,7 +1,9 @@
 package com.atamaniv
 
 import akka.actor.ActorSystem
-import com.atamaniv.Messages.{GetCsvFiles, PrintMessage}
+import com.atamaniv.Messages.{PrintMessage, StartApplication}
+
+import scala.reflect.io.Path
 
 object Main extends Greeting with App {
   println(startMessage)
@@ -9,13 +11,9 @@ object Main extends Greeting with App {
   override def main(args: Array[String]): Unit = {
     val system = ActorSystem("crime-system")
 
-    try {
       val supervisor = system.actorOf(CrimeSupervisor.props(), "crime-supervisor")
-      supervisor ! PrintMessage("Test Message")
-      supervisor ! GetCsvFiles("resources.crimes")
-    } finally {
-      println("exit")
-    }
+      supervisor ! PrintMessage("**************** Starting Application **********************")
+      supervisor ! StartApplication(Path("/Users/andriy/IdeaProjects/CrimeStatistics/src/main/resources/crimes"))
   }
 }
 
