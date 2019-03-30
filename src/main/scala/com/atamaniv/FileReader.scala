@@ -4,6 +4,10 @@ import akka.actor.{Actor, ActorLogging, PoisonPill, Props}
 import com.atamaniv.Messages.{RawData, ReadCsvFile}
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 
+
+/** Actor which is responsible for reading the csv files,
+  * can accept ReadCsvFile(path: String) message, where path is the absolute path to the csv file
+  */
 object FileReader {
   def props(): Props = Props(new FileReader)
 }
@@ -26,8 +30,6 @@ object ColumnNames extends Enumeration {
 }
 
 class FileReader extends Actor with ActorLogging {
-
-  import scala.collection.JavaConverters._
 
   override def preStart(): Unit = log.info(s"FileReader $self has been started")
 

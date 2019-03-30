@@ -4,11 +4,15 @@ import akka.actor.{Actor, ActorLogging, PoisonPill, Props}
 import com.atamaniv.ColumnNames.ColumnNames
 import com.atamaniv.Messages._
 import com.atamaniv.model.{Coordinates, Crime}
-import org.apache.spark.sql.{Dataset, Row, SparkSession}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{Dataset, Row, SparkSession}
 
-import scala.collection.JavaConverters._
 import scala.util.Try
+
+/***
+  * CrimeSupervisor class is responsible for lifecycle of FolderReader actor and FileReader actors,
+  * It consumes datasets form fileReaders and prints merged result based of Criteria
+  * */
 
 object CrimeSupervisor {
   def props(): Props = Props(new CrimeSupervisor)
@@ -25,7 +29,7 @@ class CrimeSupervisor extends Actor with ActorLogging {
 
   override def preStart(): Unit = log.info("Crime supervisor started")
 
-  override def postStop(): Unit = log.info("Crime supervisor stopped")
+  override def postStop(): Unit = log.info("**************** Application has been terminated **********************")
 
   override def receive: Receive = {
     case StartApplication(path) =>
@@ -45,12 +49,11 @@ class CrimeSupervisor extends Actor with ActorLogging {
       mainDataSet = mergeDatasets(dataset)
       mainDataSet.foreach(ds => log.info(s"Total number of rows: ${ds.count()}"))
       if (expectedFiles == 0) {
-        self ! SortData
+        self ! SortDataAndPrintTop5
       }
 
-    case SortData =>
-      val crimes = mainDataSet.map(ds => crimeList(ds)).map(_.toString).mkString
-      self ! PrintMessage(crimes)
+    case SortDataAndPrintTop5 =>
+      mainDataSet.foreach(crimeList)
       self ! PoisonPill
 
     case PrintMessage(message) => println(message)
@@ -63,19 +66,11 @@ class CrimeSupervisor extends Actor with ActorLogging {
     }
   }
 
-  private def mapToCrime(row: Row): Crime = {
-    import ColumnNameConversions._
-
-    val id = row.getAs(ColumnNames.ID).asInstanceOf[String]
-
-    println("Converted ID " + id)
-    Crime(id, Coordinates(0, 0))
-  }
-
-  private def crimeList(dataSet: Dataset[Row]): List[Crime] = {
+  private def crimeList(dataSet: Dataset[Row]): Unit = {
     val session = getSparkSession()
+    import ColumnNameConversions._
     import session.implicits._
-    val countOfGrouped = dataSet.map(row => {
+    val top5Result = dataSet.map(row => {
 
       def convertToString(income: Any): Option[String] = {
         if (income != null) {
@@ -85,17 +80,17 @@ class CrimeSupervisor extends Actor with ActorLogging {
         }
       }
 
-      val id = row.getAs(ColumnNames.ID.toString).asInstanceOf[String]
-      val longitude = row.getAs(ColumnNames.LONGITUDE.toString).asInstanceOf[String]
-      val latitude = row.getAs(ColumnNames.LATITUDE.toString).asInstanceOf[String]
-      val reportedBy = convertToString(row.getAs(ColumnNames.REPORTED_BY.toString))//row.getAs(ColumnNames.REPORTED_BY.toString).asInstanceOf[String]
-      val fallsWithin = convertToString(row.getAs(ColumnNames.FALLS_WITHIN.toString))
-      val location = convertToString(row.getAs(ColumnNames.LOCATION.toString))
-      val lsoaCode = convertToString(row.getAs(ColumnNames.LSOA_CODE.toString))
-      val lsoaName = convertToString(row.getAs(ColumnNames.LSOA_NAME.toString))
-      val crimeType = convertToString(row.getAs(ColumnNames.CRIME_TYPE.toString))
-      val lastOutcome = convertToString(row.getAs(ColumnNames.LAST_OUTCOME.toString))
-      val context = convertToString(row.getAs(ColumnNames.CONTEXT.toString))
+      val id = row.getAs(ColumnNames.ID).asInstanceOf[String]
+      val longitude = row.getAs(ColumnNames.LONGITUDE).asInstanceOf[String]
+      val latitude = row.getAs(ColumnNames.LATITUDE).asInstanceOf[String]
+      val reportedBy = convertToString(row.getAs(ColumnNames.REPORTED_BY))
+      val fallsWithin = convertToString(row.getAs(ColumnNames.FALLS_WITHIN))
+      val location = convertToString(row.getAs(ColumnNames.LOCATION))
+      val lsoaCode = convertToString(row.getAs(ColumnNames.LSOA_CODE))
+      val lsoaName = convertToString(row.getAs(ColumnNames.LSOA_NAME))
+      val crimeType = convertToString(row.getAs(ColumnNames.CRIME_TYPE))
+      val lastOutcome = convertToString(row.getAs(ColumnNames.LAST_OUTCOME))
+      val context = convertToString(row.getAs(ColumnNames.CONTEXT))
 
       Crime(crimeId = id,
         coordinates = Coordinates(Try(longitude.toDouble).toOption.getOrElse(0L), Try(latitude.toDouble).toOption.getOrElse(0L)),
@@ -109,15 +104,12 @@ class CrimeSupervisor extends Actor with ActorLogging {
         context = context
       )
 
+    }).groupBy("coordinates")
+      .agg(count("crimeId") as "Count", collect_set("crimeType") as "Crime Type")
+      .sort($"Count".desc)
+      .limit(5)
 
-    }).groupBy("coordinates").count().count()
-
-    println("COUNT OF GROUPED: " + countOfGrouped)
-
-    Nil
-
-//      .agg(collect_list("crimeType") as "list")
-      //.collectAsList().asScala.toList
+    top5Result.show(false)
   }
 
   private def getSparkSession(): SparkSession = {

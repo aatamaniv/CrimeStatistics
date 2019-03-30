@@ -5,6 +5,12 @@ import com.atamaniv.Messages.{PrintMessage, StartApplication}
 
 import scala.reflect.io.{File, Path}
 
+/***
+  * Main Class of CrimeStatistics app, accept one argument, the path of folder,
+  * It checks if folder exists and print back an error otherwise.
+  * CrimeSupervisor actor is created here.
+  * */
+
 object Main extends App {
 
   final val SYSTEM_NAME = "crime-system"
