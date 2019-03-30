@@ -23,6 +23,8 @@ class CrimeSupervisor extends Actor with ActorLogging {
         fileReader ! ReadCsvFile(file.toString())
       })
 
+    case CrimeDataUpdated(crimes) => //TODO Merge data and group be criteria
+
     case PrintMessage(message) => println(message)
   }
 }

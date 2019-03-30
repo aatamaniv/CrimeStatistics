@@ -3,15 +3,35 @@ package com.atamaniv
 import akka.actor.{Actor, ActorLogging, Props}
 import com.atamaniv.Messages.ReadCsvFile
 import com.atamaniv.model.Crime
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 object FileReader {
   def props(): Props = Props(new FileReader)
 }
 
+object ColumnNames extends Enumeration {
+  type ColumnNames = Value
+
+  val ID = Value("Crime ID")
+  val MONTH = Value("Month")
+  val REPORTED_BY = Value("Reported by")
+  val FALLS_WITHIN = Value("Falls within")
+  val LONGITUDE = Value("Longitude")
+  val LATITUDE = Value("Latitude")
+  val LOCATION = Value("Location")
+  val LSOA_CODE = Value("LSOA code")
+  val LSOA_NAME = Value("LSOA name")
+  val CRIME_TYPE = Value("Crime type")
+  val LAST_OUTCOME = Value("Last outcome category")
+  val CONTEXT = Value("Context")
+}
+
 class FileReader extends Actor with ActorLogging {
 
+  import scala.collection.JavaConverters._
+
   override def preStart(): Unit = log.info(s"FileReader $self has been started")
+
   override def postStop(): Unit = log.info(s"FileReader $self has been stopped")
 
   implicit val sparkSession = getSparkSession()
@@ -22,12 +42,17 @@ class FileReader extends Actor with ActorLogging {
       sender ! readFile(filePath)
   }
 
+  private def mapToCrime(row: Row): Crime = {
+    null
+  }
+
   private def readFile(path: String): List[Crime] = {
     import sparkSession.implicits._
     val df = loadFileToDataFrame(path)
-    val ids = df.map(row => row.getValuesMap(List("Crime ID")))
-    println("Found " + ids.count() + " items")
-    Nil
+
+    val crimesWithId = df.filter(_.get(0) != null).cache()
+
+    crimesWithId.map(mapToCrime).collectAsList().asScala.toList
   }
 
   private def getSparkSession(): SparkSession = {

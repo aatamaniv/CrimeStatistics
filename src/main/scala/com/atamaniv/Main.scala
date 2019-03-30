@@ -9,7 +9,7 @@ object Main extends App {
 
   final val SYSTEM_NAME = "crime-system"
   final val MAIN_ACTOR_NAME = "crime-supervisor"
-  var isStarted: Boolean = false //For tests only
+  var isStarted: Boolean = false //For tests purposes only
 
   override def main(args: Array[String]): Unit = {
 

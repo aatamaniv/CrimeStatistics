@@ -1,5 +1,7 @@
 package com.atamaniv
 
+import com.atamaniv.model.Crime
+
 import scala.reflect.io.Path
 
 object Messages {
@@ -8,4 +10,5 @@ object Messages {
   case class ReadCsvFile(path: String)
   case class PrintMessage(message: String)
   case class StartApplication(folderPath: Path)
+  case class CrimeDataUpdated(crimes: List[Crime])
 }
