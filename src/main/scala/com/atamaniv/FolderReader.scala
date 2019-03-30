@@ -23,8 +23,4 @@ class FolderReader extends Actor with ActorLogging {
   private def getFiles(path: Path): List[Path] = {
     path.toDirectory.list.toList
   }
-
-  def isDirectoryExists(directory: Path): Boolean = {
-    File(directory).isDirectory
-  }
 }
