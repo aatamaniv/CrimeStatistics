@@ -1,7 +1,8 @@
 package com.atamaniv
 
 import akka.actor.{Actor, ActorLogging, Props}
-import com.atamaniv.Messages.{Crime, ReadCsvFile}
+import com.atamaniv.Messages.ReadCsvFile
+import com.atamaniv.model.Crime
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object FileReader {

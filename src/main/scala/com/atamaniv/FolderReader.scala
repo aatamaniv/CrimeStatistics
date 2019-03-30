@@ -3,7 +3,7 @@ package com.atamaniv
 import akka.actor.{Actor, ActorLogging, Props}
 import com.atamaniv.Messages.{CsvFiles, GetCsvFiles}
 
-import scala.reflect.io.{File, Path}
+import scala.reflect.io.Path
 
 object FolderReader {
   def props(): Props = Props(new FolderReader)

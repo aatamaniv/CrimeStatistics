@@ -1,6 +1,6 @@
 package com.atamaniv
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, Props}
 import com.atamaniv.Messages._
 
 object CrimeSupervisor {
