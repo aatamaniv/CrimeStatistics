@@ -1,6 +1,6 @@
 package com.atamaniv
 
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{Actor, ActorLogging, PoisonPill, Props}
 import com.atamaniv.Messages.{CsvFiles, GetCsvFiles}
 
 import scala.reflect.io.Path
@@ -18,6 +18,7 @@ class FolderReader extends Actor with ActorLogging {
     case GetCsvFiles(folderPath: Path) =>
       log.info("Started loading files from path " + folderPath)
       sender ! CsvFiles(getFiles(folderPath))
+      self ! PoisonPill
   }
 
   private def getFiles(path: Path): List[Path] = {

@@ -15,8 +15,8 @@ class MainSpec extends FlatSpec with Matchers {
 
   "Application" should "start correctly when path is provided and the folder exists" in {
     val file = File("tmp" + UUID.randomUUID()).createDirectory()
-    val emptyArgs: Array[String] = Array(file.path)
-    Main.main(emptyArgs)
+    val args: Array[String] = Array(file.path)
+    Main.main(args)
     Main.isStarted.shouldBe(true)
     file.delete()
   }

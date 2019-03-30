@@ -1,3 +1,3 @@
 package com.atamaniv.model
 
-case class Coordinates(longitude: Long, latitude: Long)
+case class Coordinates(longitude: Double, latitude: Double)

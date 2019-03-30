@@ -1,8 +1,7 @@
 package com.atamaniv
 
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{Actor, ActorLogging, PoisonPill, Props}
 import com.atamaniv.Messages.{RawData, ReadCsvFile}
-import com.atamaniv.model.Crime
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 
 object FileReader {
@@ -40,11 +39,10 @@ class FileReader extends Actor with ActorLogging {
     case ReadCsvFile(filePath: String) =>
       println("asked to read " + filePath)
       sender ! RawData(readFile(filePath))
+      self ! PoisonPill
   }
 
   private def readFile(path: String): Dataset[Row] = {
-    //import sparkSession.implicits._
-    //crimesWithId.map(mapToCrime).collectAsList().asScala.toList
     val df = loadFileToDataFrame(path)
     df.filter(_.get(0) != null).cache()
   }

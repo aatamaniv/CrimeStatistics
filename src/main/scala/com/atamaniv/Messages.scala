@@ -13,4 +13,5 @@ object Messages {
   case class StartApplication(folderPath: Path)
   case class CrimeData(crimes: List[Crime])
   case class RawData(dataset: Dataset[Row])
+  case object SortData
 }
