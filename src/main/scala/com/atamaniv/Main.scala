@@ -22,7 +22,7 @@ object Main extends App {
     args.toList match {
       case head :: Nil =>  if (isDirectoryExists(head)) startApplication(head)
       else println(s"please provide a correct path to folder, this one $head is not correct")
-      case Nil => println("Please provide absolute path to your csv folder with crime data")
+      case _ => println("Please provide one absolute path to your csv folder with crime data")
     }
   }
 
