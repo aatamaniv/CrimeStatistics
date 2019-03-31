@@ -26,7 +26,10 @@ object ColumnNameConversions {
 class CrimeSupervisor extends Actor with ActorLogging {
   override def preStart(): Unit = log.info("Crime supervisor started")
 
-  override def postStop(): Unit = log.info("**************** Application has been terminated **********************")
+  override def postStop(): Unit = {
+    log.info("**************** Application has been terminated **********************")
+    sparkSession.close()
+  }
 
   implicit val sparkSession = getSparkSession()
 
