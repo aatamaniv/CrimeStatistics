@@ -1,7 +1,7 @@
 package com.atamaniv
 
 import akka.actor.ActorSystem
-import com.atamaniv.Messages.{PrintMessage, StartApplication}
+import com.atamaniv.Messages.{CalculateAndPrintTop5, PrintMessage}
 
 import scala.reflect.io.{File, Path}
 
@@ -30,7 +30,7 @@ object Main extends App {
     val system = ActorSystem(SYSTEM_NAME)
     val supervisor = system.actorOf(CrimeSupervisor.props(), MAIN_ACTOR_NAME)
     supervisor ! PrintMessage("**************** Starting Application **********************")
-    supervisor ! StartApplication(Path(path))
+    supervisor ! CalculateAndPrintTop5(path)
     isStarted = true
   }
 
